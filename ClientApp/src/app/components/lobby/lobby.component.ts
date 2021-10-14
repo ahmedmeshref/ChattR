@@ -32,10 +32,12 @@ export class LobbyComponent implements OnInit, OnDestroy {
     this.connection.on("UserLeft", userId => this.userLeft(userId));
     this.connection.on("SetMessages", messages => this.setMessages(messages));
     this.connection.on("RecieveMessage", message => this.recieveMessage(message));
-    this.connection.on("SendMessages", messages => this.sendMessage());
+    this.connection.on("SendMessages", _ => this.sendMessage());
+    this.connection.on("CreateRoom", _ => this.createRoom());
 
     this.peeps = [];
     this.lobbyMessages = [];
+    this.rooms = [];
     this.connection.start().then(() => {
       this.connection.invoke("EnterLobby");
     });
@@ -53,6 +55,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
     this.connection.off("SetMessages");
     this.connection.off("RecieveMessage");
     this.connection.off("SendMessages");
+    this.connection.off("CreateRoom");
     this.connection.stop(); // The stop() function is actually asynchronous, it returns a Promise.
   }
 
@@ -95,10 +98,14 @@ export class LobbyComponent implements OnInit, OnDestroy {
 
   createRoom() {
     // TODO: szoba létrehozása szerveren, majd navigáció a szoba útvonalára, szükség esetén megadni a passkey-t
+    this.connection.invoke("CreateRoom", this.newRoomName);
+    
+    this.newRoomName = "";
   }
 
   roomCreated(room: Room) {
     // TODO: szobalista frissítése
+    this.rooms.push(room);
   }
 
   roomAbandoned(roomName: string) {
